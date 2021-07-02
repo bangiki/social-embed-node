@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        iframe {
+            margin-left: calc(50% - 306px);
+            margin-left: -webkit-calc(50% - 306px);
+            margin-left: -moz-calc(50% - 306px);
+        }
+
+        @media only screen and (max-width: 612px) {
+            iframe {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        .videoWrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            /* 16:9 */
+            padding-top: 25px;
+            height: 0;
+        }
+
+        .videoWrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        ul.a {
+            list-style-type: circle;
+        }
+
+        ul.b {
+            list-style-type: square;
+        }
+
+        ul.b a {
+            list-style-type: square;
+            font-size: medium;
+        }
+
+        ol.c {
+            list-style-type: upper-roman;
+        }
+
+        ol.d {
+            list-style-type: lower-alpha;
+        }
+    </style>
+</head>
+
+<body>
+    <h3><i>Sample Page Social Embed for Testing</i></h3>
+    {{{body}}}
+</body>
+</html>

@@ -1,14 +1,58 @@
 const express = require('express');
-var CryptoJS = require("crypto-js");
-var Base64 = require("crypto-js/enc-base64");
-var Utf8 = require("crypto-js/enc-utf8");
-var qs = require('querystring');
+const CryptoJS = require("crypto-js");
+const Utf8 = require("crypto-js/enc-utf8");
+const qs = require('querystring');
 
 const path = require('path');
-const { utimes } = require('fs');
-
 const app = express();
 const port = process.env.PORT || 8080;
+
+const handlebars = require('express-handlebars');
+app.set('view engine', 'hbs');
+app.engine('hbs', handlebars({
+    layoutsDir: __dirname + '/views/layouts',
+    extname: 'hbs',
+    defaultLayout: 'index',
+    partialsDir: __dirname + '/views/partials/'
+}));
+
+articleList = () => {
+    return [
+        {
+            link: 'https://editorial.femaledaily.com/blog/2021/06/28/4-eye-cream-dengan-kandungan-retinol-untuk-bikin-tampilan-lebih-awet-muda',
+            title: '4 Eye Cream dengan Kandungan Retinol untuk Bikin Tampilan Lebih Awet Muda'
+        },
+        {
+            link: 'https://editorial.femaledaily.com/blog/2021/06/15/rangkaian-citra-cantik-indonesia-baru-untuk-kulit-lebih-cerah-dan-sehat',
+            title: 'Rangkaian Citra Cantik Indonesia Baru untuk Kulit Lebih Cerah dan Sehat'
+        },
+    ];
+}
+
+tokenParseData = (param) => {
+    var resultDecrypt = decrypt(qs.unescape(param))
+    const decryptSplit = resultDecrypt.split('||')
+    return [
+        {
+            username: decryptSplit[0],
+            token: decryptSplit[1],
+            articleSlug: decryptSplit[2]
+        }
+    ];
+}
+const addQuery = (req, res, next) => {
+    req.query.param = req.query.param;
+    next();
+}
+// Routing
+app.get('/', addQuery, express.query(), (req, res) => {
+
+    res.render('main', { 
+        layout: 'index', 
+        articles: articleList(), 
+        tokenParsed: tokenParseData(req.query.param) 
+    });
+});
 
 var key = Utf8.parse('mommiespwdnyadisuruhtigapuluhdua');
 var iv = Utf8.parse('1092837465839201');
@@ -21,12 +65,11 @@ var cipherParams = {
 function encrypt(plaintext) {
     const resultArrayConverted = arrayOfUint8Converted(plaintext)
 
-    var result = CryptoJS.AES.encrypt(
+    return CryptoJS.AES.encrypt(
         arrayToStringConvert(resultArrayConverted),
         key,
         cipherParams
-    )
-    return Utf8.stringify(Utf8.parse(result))
+    ).toString(Utf8)
 }
 
 function decrypt(ciphertext) {
@@ -51,43 +94,23 @@ function arrayToStringConvert(array) {
     return new TextDecoder("utf-8").decode(array)
 }
 
-const addQuery = (req, res, next) => {
-    req.query.param = req.query.param;
-    next();
-}
-
-app.get('/webview', addQuery, express.query(),  function (req, res) {
-   
-    // var encryptString = qs.escape(encrypt(req.query.param))
-    var resultDecrypt = decrypt(qs.unescape(req.query.param))
-    const decryptSplit = resultDecrypt.split('||')
-
-    res.send("Decrypt: <code>" + resultDecrypt +
-        "</code></br> Username: <code>" + decryptSplit[0] +
-        "</code></br> Token: <code>" + decryptSplit[1] +
-        "</code></br> Slug: <code>" + decryptSplit[2]+'</code>')
-})
 
 
-app.get('/decrypt/:enkripsi', function (req, res) {
-    var getEnkripsi = req.params.enkripsi
-    var plaintext = "abc"
-    var encryptString = qs.escape(encrypt(plaintext))
-    var resultDecrypt = decrypt(qs.unescape(encryptString)).split('||')
+// app.get('/webview', addQuery, express.query(), function (req, res) {
 
-    res.send('ciphertext: ' + encryptString +
-        "\n decrypt: " + resultDecrypt +
-        "\n username: " + resultDecrypt[0] +
-        "\n token: " + resultDecrypt[1] +
-        "\n slug: " + resultDecrypt[2])
-})
+//     // var encryptString = qs.escape(encrypt(req.query.param))
 
 
+//     res.send("<b>Decrypt:</b> <code>" + resultDecrypt +
+//         "</code></br> <b>Username:</b> <code>" + decryptSplit[0] +
+//         "</code></br> <b>Token:</b> <code>" + decryptSplit[1] +
+//         "</code></br> <b>Slug:</b> <code>" + decryptSplit[2] + '</code>')
+// })
 
-// sendFile will go here
-app.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname, '/index.html'));
-});
+// // sendFile will go here
+// app.get('/', function (req, res) {
+//     res.sendFile(path.join(__dirname, '/index.html'));
+// });
 
 app.listen(port);
 console.log('Server started at http://localhost:' + port);
