@@ -2,6 +2,7 @@ const express = require('express');
 var CryptoJS = require("crypto-js");
 var Base64 = require("crypto-js/enc-base64");
 var Utf8 = require("crypto-js/enc-utf8");
+var qs = require('querystring');
 
 const path = require('path');
 const { utimes } = require('fs');
@@ -50,11 +51,29 @@ function arrayToStringConvert(array) {
     return new TextDecoder("utf-8").decode(array)
 }
 
+const addQuery = (req, res, next) => {
+    req.query.param = req.query.param;
+    next();
+}
+
+app.get('/webview', addQuery, express.query(),  function (req, res) {
+   
+    // var encryptString = qs.escape(encrypt(req.query.param))
+    var resultDecrypt = decrypt(qs.unescape(req.query.param))
+    const decryptSplit = resultDecrypt.split('||')
+
+    res.send("Decrypt: <code>" + resultDecrypt +
+        "</code></br> Username: <code>" + decryptSplit[0] +
+        "</code></br> Token: <code>" + decryptSplit[1] +
+        "</code></br> Slug: <code>" + decryptSplit[2]+'</code>')
+})
+
+
 app.get('/decrypt/:enkripsi', function (req, res) {
     var getEnkripsi = req.params.enkripsi
-    var plaintext = "bangiqi||tokensaya||4-eye-cream-dengan-kandungan-retinol-untuk-bikin-tampilan-lebih-awet-muda"
-    var encryptString = encrypt(plaintext)
-    var resultDecrypt = decrypt(encryptString).split('||')
+    var plaintext = "abc"
+    var encryptString = qs.escape(encrypt(plaintext))
+    var resultDecrypt = decrypt(qs.unescape(encryptString)).split('||')
 
     res.send('ciphertext: ' + encryptString +
         "\n decrypt: " + resultDecrypt +
@@ -62,6 +81,8 @@ app.get('/decrypt/:enkripsi', function (req, res) {
         "\n token: " + resultDecrypt[1] +
         "\n slug: " + resultDecrypt[2])
 })
+
+
 
 // sendFile will go here
 app.get('/', function (req, res) {
