@@ -41,7 +41,7 @@ tokenParseData = (param) => {
     ];
 }
 const addQuery = (req, res, next) => {
-    req.query.param = req.query.param;
+    req.query.slug = req.query.slug;
     next();
 }
 // Routing
@@ -50,7 +50,7 @@ app.get('/', addQuery, express.query(), (req, res) => {
     res.render('main', { 
         layout: 'index', 
         articles: articleList(), 
-        tokenParsed: tokenParseData(req.query.param) 
+        tokenParsed: tokenParseData(req.query.slug) 
     });
 });
 
