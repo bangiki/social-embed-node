@@ -26,7 +26,7 @@ app.engine('hbs', handlebars({
     partialsDir: __dirname + '/views/partials/'
 }));
 
-articleList = () => {
+articleListProd = () => {
     return [
         {
             link: 'https://editorial.femaledaily.com/blog/2021/06/28/4-eye-cream-dengan-kandungan-retinol-untuk-bikin-tampilan-lebih-awet-muda',
@@ -35,6 +35,19 @@ articleList = () => {
         {
             link: 'https://editorial.femaledaily.com/blog/2021/06/15/rangkaian-citra-cantik-indonesia-baru-untuk-kulit-lebih-cerah-dan-sehat',
             title: 'Rangkaian Citra Cantik Indonesia Baru untuk Kulit Lebih Cerah dan Sehat'
+        },
+    ];
+}
+
+articleListStaging = () => {
+    return [
+        {
+            link: 'https://editorial.femaledaily.net/blog/2021/04/28/article-paging/2',
+            title: 'Article Paging'
+        },
+        {
+            link: 'https://editorial.femaledaily.net/blog/2021/04/12/selain-green-beauty-pernah-dengar-blue-beauty-style-detail',
+            title: 'Selain Green Beauty, Pernah Dengar Blue Beauty? style detail'
         },
     ];
 }
@@ -73,7 +86,8 @@ app.get('/', addQuery, express.query(), (req, res) => {
 
     res.render('main', { 
         layout: 'index', 
-        articles: articleList(),
+        articlesProd: articleListProd(),
+        articlesStaging: articleListStaging(),
         articlesPagination: articleListWithPaging(req.query),
         tokenParsed: tokenParseData(req.query.slug) 
     });
