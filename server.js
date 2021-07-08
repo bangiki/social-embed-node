@@ -1,14 +1,24 @@
-const express = require('express');
-const CryptoJS = require("crypto-js");
-const Utf8 = require("crypto-js/enc-utf8");
-const qs = require('querystring');
+const express       = require('express');
+const CryptoJS      = require("crypto-js");
+const Utf8          = require("crypto-js/enc-utf8");
+const qs            = require('querystring');
+const handlebars    = require('express-handlebars');
 
-const path = require('path');
-const app = express();
-const port = process.env.PORT || 8080;
+const path          = require('path');
+const app           = express();
+const port          = process.env.PORT || 8080;
 
-const handlebars = require('express-handlebars');
+// config AES 256
+var key = Utf8.parse('mommiespwdnyadisuruhtigapuluhdua');
+var iv = Utf8.parse('1092837465839201');
+
+var cipherParams = {
+    iv: iv,
+    padding: CryptoJS.pad.Pkcs7
+}
+
 app.set('view engine', 'hbs');
+
 app.engine('hbs', handlebars({
     layoutsDir: __dirname + '/views/layouts',
     extname: 'hbs',
@@ -29,6 +39,17 @@ articleList = () => {
     ];
 }
 
+articleListWithPaging = (query) => {
+    var resultDecrypt = decrypt(qs.unescape(query.slug))
+    const decryptSplit = resultDecrypt.split('||')
+    return [
+        {
+            slug: decryptSplit[2],
+            page: query.page
+        }
+    ];
+}
+
 tokenParseData = (param) => {
     var resultDecrypt = decrypt(qs.unescape(param))
     const decryptSplit = resultDecrypt.split('||')
@@ -40,27 +61,23 @@ tokenParseData = (param) => {
         }
     ];
 }
+
 const addQuery = (req, res, next) => {
     req.query.slug = req.query.slug;
+    req.query.page = req.query.page;
     next();
 }
+
 // Routing
 app.get('/', addQuery, express.query(), (req, res) => {
 
     res.render('main', { 
         layout: 'index', 
-        articles: articleList(), 
+        articles: articleList(),
+        articlesPagination: articleListWithPaging(req.query),
         tokenParsed: tokenParseData(req.query.slug) 
     });
 });
-
-var key = Utf8.parse('mommiespwdnyadisuruhtigapuluhdua');
-var iv = Utf8.parse('1092837465839201');
-
-var cipherParams = {
-    iv: iv,
-    padding: CryptoJS.pad.Pkcs7
-}
 
 function encrypt(plaintext) {
     const resultArrayConverted = arrayOfUint8Converted(plaintext)
@@ -93,24 +110,6 @@ function arrayOfUint8Converted(text) {
 function arrayToStringConvert(array) {
     return new TextDecoder("utf-8").decode(array)
 }
-
-
-
-// app.get('/webview', addQuery, express.query(), function (req, res) {
-
-//     // var encryptString = qs.escape(encrypt(req.query.param))
-
-
-//     res.send("<b>Decrypt:</b> <code>" + resultDecrypt +
-//         "</code></br> <b>Username:</b> <code>" + decryptSplit[0] +
-//         "</code></br> <b>Token:</b> <code>" + decryptSplit[1] +
-//         "</code></br> <b>Slug:</b> <code>" + decryptSplit[2] + '</code>')
-// })
-
-// // sendFile will go here
-// app.get('/', function (req, res) {
-//     res.sendFile(path.join(__dirname, '/index.html'));
-// });
 
 app.listen(port);
 console.log('Server started at http://localhost:' + port);
