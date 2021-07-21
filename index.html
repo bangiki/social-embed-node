@@ -9,6 +9,23 @@
   src="https://code.jquery.com/jquery-3.6.0.min.js"
   integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
   crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        $(document).on('touchstart', 'textarea, input[type=text], input[type=date], input[type=password], input[type=email], input[type=number]', function (e) {
+
+            var intv = 100;
+            var $obj = $(this);
+
+            if (getMobileOperatingSystem() == 'ios') {
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                $obj.css({ 'transform': 'TranslateY(-10000px)' }).focus();
+                setTimeout(function () { $obj.css({ 'transform': 'none' }); }, intv);
+            }
+            return true;
+        });
+    </script>
     <title>Document</title>
     <style>
         iframe {
